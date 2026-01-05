@@ -48,21 +48,35 @@ def normalize_dataframe(df, mapping, file_name, sheet_name):
     }
 
 def generate_report_llm(payload, audience):
+    import os
+    import json
     from openai import OpenAI
-    client = OpenAI()
 
-    prompt = f"""You are a professional project manager.
+    api_key = os.environ.get("OPENAI_API_KEY")
+
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set in environment")
+
+    client = OpenAI(api_key=api_key)
+
+    prompt = f"""
+You are a professional project manager.
 
 Audience: {audience}
 
-Generate a weekly status report with:
-- Weekly Accomplishments
-- Ongoing Work
-- Risks / Issues
-- Upcoming Milestones
+Generate a weekly status report with exactly these sections:
+1. Weekly Accomplishments
+2. Ongoing Work
+3. Risks / Issues
+4. Upcoming Milestones
+
+Rules:
+- INTERNAL: detailed, operational
+- LEADERSHIP: high-level, no owners
+- CUSTOMER: no internal language, no blame, no blockers
 
 Data:
-{json.dumps(payload)}
+{json.dumps(payload, indent=2)}
 """
 
     response = client.responses.create(
