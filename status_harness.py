@@ -49,9 +49,12 @@ def normalize_dataframe(df, mapping, file_name, sheet_name):
 
 from openai_client import get_openai_client
 
-# =========================
-# SYSTEM PROMPT (GLOBAL)
-# =========================
+# =========================================================
+# PROMPT VERSION: v1.2 (Executive)
+# STATUS: LOCKED — Production Baseline
+# DO NOT MODIFY without creating a new version
+# =========================================================
+
 SYSTEM_PROMPT = """
 You are a senior enterprise Project Management consultant.
 
