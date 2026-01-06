@@ -100,12 +100,8 @@ STRICT REQUIREMENTS:
 
 Additional Quality Rules:
 - Explicitly justify the Overall Project Status (Green/Yellow/Red) in one concise sentence.
-- Avoid placeholder text such as “[insert date]”. If dates are unknown, clearly state dependencies or use “TBD (dependent on X)”.
+- Avoid placeholder text such as insert date. If dates are unknown, clearly state dependencies or use TBD (dependent on X).
 - PM Recommendation must be concise, action-oriented, and framed as a leadership decision or escalation.
-
-Project Data:
-{payload}
-"""
 
 Project Data:
 {payload}
