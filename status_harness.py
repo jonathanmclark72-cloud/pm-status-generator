@@ -47,42 +47,70 @@ def normalize_dataframe(df, mapping, file_name, sheet_name):
         }
     }
 
-def generate_report_llm(payload, audience):
-    import os
-    import json
-    from openai import OpenAI
+from openai_client import get_openai_client
 
-    api_key = os.environ.get("OPENAI_API_KEY")
+# =========================
+# SYSTEM PROMPT (GLOBAL)
+# =========================
+SYSTEM_PROMPT = """
+You are a senior enterprise Project Management consultant.
 
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not set in environment")
+You specialize in:
+- Executive communication
+- Risk identification and escalation
+- Clear, concise weekly status reporting
+- Translating raw project data into decision-ready insights
 
-    client = OpenAI(api_key=api_key)
+Your tone is professional, confident, and concise.
+You avoid fluff, repetition, and generic language.
+You surface risks early and provide actionable recommendations.
+"""
 
-    prompt = f"""
-You are a professional project manager.
+def generate_report_llm(payload: dict, audience: str) -> str:
+    USER_PROMPT = f"""
+Using the provided project data, generate a Weekly Project Status Report suitable for executives and stakeholders.
 
 Audience: {audience}
 
-Generate a weekly status report with exactly these sections:
-1. Weekly Accomplishments
-2. Ongoing Work
-3. Risks / Issues
-4. Upcoming Milestones
+STRICT REQUIREMENTS:
+1. Begin with an Overall Project Status using one of:
+   - 🟢 Green (On Track)
+   - 🟡 Yellow (At Risk)
+   - 🔴 Red (Off Track)
 
-Rules:
-- INTERNAL: detailed, operational
-- LEADERSHIP: high-level, no owners
-- CUSTOMER: no internal language, no blame, no blockers
+2. Structure the report using the following sections EXACTLY:
+   - Overall Status
+   - Key Accomplishments (This Week)
+   - Current Focus (In Progress)
+   - Risks & Blockers (Attention Required)
+   - Upcoming Milestones (Next 1–2 Weeks)
+   - PM Recommendation
 
-Data:
-{json.dumps(payload, indent=2)}
+3. Focus on:
+   - Outcomes over activities
+   - Risks, dependencies, and blockers
+   - Clear executive-level language
+   - Brevity and scannability
+
+4. In the “Risks & Blockers” section:
+   - Clearly label blockers
+   - Explain impact if unresolved
+
+5. End with a concise PM Recommendation that advises leadership on next actions or decisions.
+
+Project Data:
+{payload}
 """
 
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt,
-        temperature=0.2
+    client = get_openai_client()
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": USER_PROMPT},
+        ],
     )
 
-    return response.output_text
+    return response.choices[0].message.content
+
